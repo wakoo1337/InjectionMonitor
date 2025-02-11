@@ -27,7 +27,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		find_info.cbSize = sizeof find_info;
 		SHGetStockIconInfo(SIID_FIND, SHGSI_ICON, &find_info);
 		main_struct->find_icon = find_info.hIcon;
-		PostMessageW(main_struct->find_button, BM_SETIMAGE, IMAGE_ICON, (LPARAM) main_struct->find_icon);
+		PostMessageW(main_struct->find_button, BM_SETIMAGE, IMAGE_ICON, (LPARAM)main_struct->find_icon);
 		main_struct->path_edit = CreateWindowExW(0, L"edit", L"", WS_CHILD | WS_VISIBLE, 0, 0, 0, 0, h, NULL, main_struct->hInstance, NULL);
 		main_struct->run_button = CreateWindowExW(0, L"button", L"Запустить", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 0, 0, h, (HMENU)COMMAND_RUN, main_struct->hInstance, NULL);
 		main_struct->exit_button = CreateWindowExW(0, L"button", L"Выйти", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 0, 0, h, (HMENU)COMMAND_EXIT, main_struct->hInstance, NULL);
@@ -37,11 +37,11 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		ncm.cbSize = sizeof ncm;
 		SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &ncm, 0);
 		main_struct->font = CreateFontIndirectW(&ncm.lfMenuFont);
-		PostMessageW(main_struct->path_static, WM_SETFONT, (WPARAM) main_struct->font, TRUE);
-		PostMessageW(main_struct->path_edit, WM_SETFONT, (WPARAM) main_struct->font, TRUE);
-		PostMessageW(main_struct->run_button, WM_SETFONT, (WPARAM) main_struct->font, TRUE);
-		PostMessageW(main_struct->exit_button, WM_SETFONT, (WPARAM) main_struct->font, TRUE);
-		PostMessageW(main_struct->about_button, WM_SETFONT, (WPARAM) main_struct->font, TRUE);
+		PostMessageW(main_struct->path_static, WM_SETFONT, (WPARAM)main_struct->font, TRUE);
+		PostMessageW(main_struct->path_edit, WM_SETFONT, (WPARAM)main_struct->font, TRUE);
+		PostMessageW(main_struct->run_button, WM_SETFONT, (WPARAM)main_struct->font, TRUE);
+		PostMessageW(main_struct->exit_button, WM_SETFONT, (WPARAM)main_struct->font, TRUE);
+		PostMessageW(main_struct->about_button, WM_SETFONT, (WPARAM)main_struct->font, TRUE);
 		InvalidateRect(h, NULL, TRUE);
 	}
 	break;
@@ -69,7 +69,9 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		if (cmd == COMMAND_FIND) {
 		}
 		else if (cmd == COMMAND_RUN) {
-
+			const int length = GetWindowTextLengthW(main_struct->path_edit);
+			LPWSTR path = malloc(sizeof(wchar_t) * (length + 1));
+			GetWindowTextW(main_struct->path_edit, path, length + 1);
 		}
 		else if (cmd == COMMAND_EXIT) {
 			DestroyWindow(h);
