@@ -71,7 +71,20 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		else if (cmd == COMMAND_RUN) {
 			const int length = GetWindowTextLengthW(main_struct->path_edit);
 			LPWSTR path = malloc(sizeof(wchar_t) * (length + 1));
+			if (NULL == path) {
+				DestroyWindow(h);
+				return 1;
+			};
 			GetWindowTextW(main_struct->path_edit, path, length + 1);
+			STARTUPINFOW siw = {
+				.cb = sizeof(STARTUPINFOW)
+			};
+			PROCESS_INFORMATION pi;
+			CreateProcessW(path, NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &siw, &pi);
+			ResumeThread(pi.hThread);
+			CloseHandle(pi.hProcess);
+			CloseHandle(pi.hThread);
+			free(path);
 		}
 		else if (cmd == COMMAND_EXIT) {
 			DestroyWindow(h);
