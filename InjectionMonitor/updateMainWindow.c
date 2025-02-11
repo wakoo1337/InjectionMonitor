@@ -4,7 +4,7 @@
 #include "updateMainWindow.h"
 void updateMainWindow(HWND h, struct MainWindowStruct* main_struct) {
 	const unsigned int border = 10;
-	const unsigned int pstatic_width = 100;
+	const unsigned int pstatic_width = 40;
 	const unsigned int find_size = 32;
 	const unsigned int button_width = 100;
 	const unsigned int button_height = 40;
