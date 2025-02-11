@@ -81,6 +81,19 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 			};
 			PROCESS_INFORMATION pi;
 			CreateProcessW(path, NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &siw, &pi);
+			const wchar_t dll_name[] = L"C:\\Users\\wakoo\\Documents\\Учёба\\4 семестр\\InjectionMonitor\\x64\\Debug\\MonitorLibrary.dll";
+			LPVOID* path_copy;
+			path_copy = VirtualAllocEx(pi.hProcess, NULL, sizeof dll_name, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+			if (!WriteProcessMemory(pi.hProcess, path_copy, dll_name, sizeof dll_name, NULL)) {
+				return 1;
+			};
+			FARPROC load_library;
+			HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+			load_library = GetProcAddress(kernel32, "LoadLibraryW");
+			HANDLE created_thread;
+			created_thread = CreateRemoteThread(pi.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE) load_library, path_copy, 0, NULL);
+			WaitForSingleObject(created_thread, INFINITE);
+			CloseHandle(created_thread);
 			ResumeThread(pi.hThread);
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
