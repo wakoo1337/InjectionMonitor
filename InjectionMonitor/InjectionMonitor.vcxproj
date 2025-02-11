@@ -151,17 +151,22 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="aboutDialog.c" />
     <ClCompile Include="InjectionMonitor.c" />
     <ClCompile Include="mainWndProc.c" />
     <ClCompile Include="main_class_name.c" />
     <ClCompile Include="updateMainWindow.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aboutDialog.h" />
     <ClInclude Include="MainWindowStruct.h" />
     <ClInclude Include="mainWndProc.h" />
     <ClInclude Include="main_class_name.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="updateMainWindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="InjectionMonitor.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

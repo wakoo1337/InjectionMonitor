@@ -1,5 +1,6 @@
 #pragma once
 struct MainWindowStruct {
+	HINSTANCE hInstance;
 	unsigned int dpi;
 	HWND path_static, path_edit;
 	HWND find_button;
