@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <commctrl.h>
+#include "resource.h"
 #include "MainWindowStruct.h"
 #include "main_class_name.h"
 #include "mainWndProc.h"
@@ -17,7 +18,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		.lpfnWndProc = &mainWndProc,
 		.cbClsExtra = 0,
 		.cbWndExtra = sizeof(void *),
-		.hIcon = NULL,
 		.lpszMenuName = NULL,
 		.hIconSm = NULL
 	};
@@ -25,6 +25,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	main_class.hCursor = LoadImageW(hInstance, MAKEINTRESOURCE(IDC_ARROW), IMAGE_CURSOR, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
 	main_class.hbrBackground = (HBRUSH)(COLOR_WINDOW);
 	main_class.lpszClassName = main_class_name;
+	main_class.hIcon = LoadImageW(hInstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
 	RegisterClassExW(&main_class);
 	const unsigned int dpi = GetDpiForSystem();
 	HWND main_window;
