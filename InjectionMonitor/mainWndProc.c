@@ -75,25 +75,83 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
-			GetWindowTextW(main_struct->path_edit, path, length + 1);
-			STARTUPINFOW siw = {
-				.cb = sizeof(STARTUPINFOW)
-			};
-			PROCESS_INFORMATION pi;
-			CreateProcessW(path, NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &siw, &pi);
-			const wchar_t dll_name[] = L"C:\\Users\\wakoo\\Documents\\Учёба\\4 семестр\\InjectionMonitor\\x64\\Debug\\MonitorLibrary.dll";
-			LPVOID* path_copy;
-			path_copy = VirtualAllocEx(pi.hProcess, NULL, sizeof dll_name, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-			if (!WriteProcessMemory(pi.hProcess, path_copy, dll_name, sizeof dll_name, NULL)) {
+			if (GetWindowTextW(main_struct->path_edit, path, length + 1) != length) {
+				free(path);
+				DestroyWindow(h);
 				return 1;
 			};
 			FARPROC load_library;
 			HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+			if (NULL == kernel32) {
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
 			load_library = GetProcAddress(kernel32, "LoadLibraryW");
+			if (NULL == load_library) {
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			STARTUPINFOW siw = {
+				.cb = sizeof(STARTUPINFOW)
+			};
+			PROCESS_INFORMATION pi;
+			if (!CreateProcessW(path, NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &siw, &pi)) {
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			const wchar_t dll_name[] = L"C:\\Users\\wakoo\\Documents\\Учёба\\4 семестр\\InjectionMonitor\\x64\\Debug\\MonitorLibrary.dll";
+			LPVOID* path_copy;
+			path_copy = VirtualAllocEx(pi.hProcess, NULL, sizeof dll_name, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+			if (NULL == path_copy) {
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			if (!WriteProcessMemory(pi.hProcess, path_copy, dll_name, sizeof dll_name, NULL)) {
+				VirtualFreeEx(pi.hProcess, path_copy, 0, MEM_RELEASE);
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
 			HANDLE created_thread;
 			created_thread = CreateRemoteThread(pi.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE) load_library, path_copy, 0, NULL);
-			WaitForSingleObject(created_thread, INFINITE);
+			if (NULL == created_thread) {
+				VirtualFreeEx(pi.hProcess, path_copy, 0, MEM_RELEASE);
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			if (WaitForSingleObject(created_thread, INFINITE) == WAIT_FAILED) {
+				CloseHandle(created_thread);
+				VirtualFreeEx(pi.hProcess, path_copy, 0, MEM_RELEASE);
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
 			CloseHandle(created_thread);
+			if (!VirtualFreeEx(pi.hProcess, path_copy, 0, MEM_RELEASE)) {
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
 			ResumeThread(pi.hThread);
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
