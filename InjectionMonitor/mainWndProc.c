@@ -102,7 +102,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
-			const wchar_t dll_name[] = L"C:\\Users\\wakoo\\Documents\\Учёба\\4 семестр\\InjectionMonitor\\x64\\Debug\\MonitorLibrary.dll";
+			const wchar_t dll_name[] = L"C:\\Users\\wakoo\\Documents\\Учёба\\4 семестр\\Проект\\InjectionMonitor\\x64\\Debug\\MonitorLibrary.dll";
 			LPVOID* path_copy;
 			path_copy = VirtualAllocEx(pi.hProcess, NULL, sizeof dll_name, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 			if (NULL == path_copy) {
@@ -122,9 +122,9 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
-			HANDLE created_thread;
-			created_thread = CreateRemoteThread(pi.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE) load_library, path_copy, 0, NULL);
-			if (NULL == created_thread) {
+			HANDLE load_thread;
+			load_thread = CreateRemoteThread(pi.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE) load_library, path_copy, 0, NULL);
+			if (NULL == load_thread) {
 				VirtualFreeEx(pi.hProcess, path_copy, 0, MEM_RELEASE);
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
@@ -133,8 +133,8 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
-			if (WaitForSingleObject(created_thread, INFINITE) == WAIT_FAILED) {
-				CloseHandle(created_thread);
+			if (WaitForSingleObject(load_thread, INFINITE) == WAIT_FAILED) {
+				CloseHandle(load_thread);
 				VirtualFreeEx(pi.hProcess, path_copy, 0, MEM_RELEASE);
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
@@ -143,7 +143,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
-			CloseHandle(created_thread);
+			CloseHandle(load_thread);
 			if (!VirtualFreeEx(pi.hProcess, path_copy, 0, MEM_RELEASE)) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
@@ -152,6 +152,45 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
+			HMODULE monitor = GetModuleHandleW(L"MonitorLibrary.dll");
+			if (NULL == monitor) {
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			FARPROC set_hooks;
+			set_hooks = GetProcAddress(monitor, "setHooks");
+			if (NULL == set_hooks) {
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			HANDLE hook_thread;
+			hook_thread = CreateRemoteThread(pi.hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)set_hooks, NULL, 0, NULL);
+			if (NULL == hook_thread) {
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			if (WaitForSingleObject(hook_thread, INFINITE) == WAIT_FAILED) {
+				CloseHandle(hook_thread);
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			CloseHandle(hook_thread);
 			ResumeThread(pi.hThread);
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
@@ -163,6 +202,16 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		else if (cmd == COMMAND_ABOUT) {
 			DialogBoxW(main_struct->hInstance, MAKEINTRESOURCEW(IDD_ABOUT), h, &aboutDialog);
 		};
+	}
+	break;
+	case WM_DPICHANGED:
+	{
+		main_struct->dpi = GetDpiForWindow(h);
+		updateMainWindow(h, main_struct);
+	}
+	case WM_SIZE:
+	{
+		updateMainWindow(h, main_struct);
 	}
 	break;
 	default:

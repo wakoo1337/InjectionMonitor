@@ -1,12 +1,14 @@
 #include <Windows.h>
 #include <commctrl.h>
+#include "..\MonitorLibrary\monitorStub.h"
 #include "resource.h"
 #include "MainWindowStruct.h"
 #include "main_class_name.h"
 #include "mainWndProc.h"
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
-	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR pCmdLine, _In_ int nCmdShow) {
+	monitorStub();
+	if (CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE) != S_OK) return 1;
 	static const INITCOMMONCONTROLSEX commctl_init = {
 		.dwSize = sizeof(INITCOMMONCONTROLSEX),
 		.dwICC = ICC_STANDARD_CLASSES
@@ -29,7 +31,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	RegisterClassExW(&main_class);
 	const unsigned int dpi = GetDpiForSystem();
 	HWND main_window;
-	main_window = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, main_class_name, L"", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+	main_window = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, main_class_name, L"InjectionMonitor", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
 		MulDiv(480, dpi, USER_DEFAULT_SCREEN_DPI),
 		MulDiv(144, dpi, USER_DEFAULT_SCREEN_DPI),
 		NULL, NULL, hInstance, malloc(sizeof(struct MainWindowStruct)));
@@ -42,4 +44,5 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		DispatchMessageW(&msg);
 	};
 	CoUninitialize();
+	return 0;
 };

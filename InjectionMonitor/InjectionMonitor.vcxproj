@@ -171,6 +171,11 @@
   <ItemGroup>
     <Image Include="icon1.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MonitorLibrary\MonitorLibrary.vcxproj">
+      <Project>{b46b60c3-e565-4442-896a-06150cea763d}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
