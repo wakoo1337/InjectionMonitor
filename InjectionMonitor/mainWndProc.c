@@ -128,6 +128,10 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		}
 		else if (cmd == COMMAND_RUN) {
 			const int length = GetWindowTextLengthW(main_struct->path_edit);
+			if (0 == length) {
+				MessageBoxW(h, L"Укажите путь к исполняемому файлу", L"", MB_OK | MB_ICONERROR);
+				return 0;
+			};
 			LPWSTR path = malloc(sizeof(wchar_t) * (length + 1));
 			if (NULL == path) {
 				DestroyWindow(h);
@@ -151,31 +155,55 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
+			unsigned int path_size;
+			path_size = GetFullPathNameW(L".\\MonitorLibrary.dll", 0, NULL, NULL);
+			if (0 == path_size) {
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			LPWSTR path_buffer, file_part;
+			path_buffer = malloc(path_size * sizeof(wchar_t));
+			if (NULL == path_buffer) {
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			DWORD path_reallen;
+			path_reallen = GetFullPathNameW(L".\\MonitorLibrary.dll", path_size, path_buffer, &file_part);
+			if ((path_reallen > path_size) || (path_reallen == 0)) {
+				free(path_buffer);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
 			STARTUPINFOW siw = {
 				.cb = sizeof(STARTUPINFOW)
 			};
 			PROCESS_INFORMATION pi;
 			if (!CreateProcessW(path, NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &siw, &pi)) {
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
 			};
-			const wchar_t dll_name[] = L"C:\\Users\\wakoo\\Documents\\Учёба\\4 семестр\\Проект\\InjectionMonitor\\x64\\Debug\\MonitorLibrary.dll";
 			LPVOID* path_copy;
-			path_copy = VirtualAllocEx(pi.hProcess, NULL, sizeof dll_name, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+			path_copy = VirtualAllocEx(pi.hProcess, NULL, path_size * sizeof(wchar_t), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 			if (NULL == path_copy) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
 			};
-			if (!WriteProcessMemory(pi.hProcess, path_copy, dll_name, sizeof dll_name, NULL)) {
+			if (!WriteProcessMemory(pi.hProcess, path_copy, path_buffer, path_size * sizeof(wchar_t), NULL)) {
 				VirtualFreeEx(pi.hProcess, path_copy, 0, MEM_RELEASE);
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
@@ -187,6 +215,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
@@ -197,6 +226,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
@@ -206,6 +236,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
@@ -215,6 +246,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
@@ -225,6 +257,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
@@ -235,6 +268,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
@@ -244,6 +278,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
 				CloseHandle(pi.hThread);
+				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
 				return 1;
@@ -252,6 +287,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 			ResumeThread(pi.hThread);
 			CloseHandle(pi.hProcess);
 			CloseHandle(pi.hThread);
+			free(path_buffer);
 			free(path);
 		}
 		else if (cmd == COMMAND_EXIT) {
