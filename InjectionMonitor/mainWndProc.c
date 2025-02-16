@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <shobjidl.h>
 #include "resource.h"
 #include "MainWindowStruct.h"
 #include "updateMainWindow.h"
@@ -67,6 +68,63 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 	{
 		const unsigned int cmd = LOWORD(w);
 		if (cmd == COMMAND_FIND) {
+			IFileDialog* dialog;
+			if (FAILED(CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, &dialog))) {
+				DestroyWindow(h);
+				return 1;
+			};
+			static const COMDLG_FILTERSPEC filter[] = {
+				{
+					.pszName = L"Исполняемые файлы",
+					.pszSpec = L"*.exe;*.cpl;*.ocx;*.com;*.pif"
+				},{
+					.pszName = L"Все файлы",
+					.pszSpec = L"*.*"
+				}
+			};
+			if (FAILED(dialog->lpVtbl->SetFileTypes(dialog, 2, filter))) {
+				dialog->lpVtbl->Release(dialog);
+				DestroyWindow(h);
+				return 1;
+			};
+			if (FAILED(dialog->lpVtbl->SetOptions(dialog, FOS_NOCHANGEDIR | FOS_FORCEFILESYSTEM | FOS_FILEMUSTEXIST))) {
+				dialog->lpVtbl->Release(dialog);
+				DestroyWindow(h);
+				return 1;
+			};
+			if (FAILED(dialog->lpVtbl->SetTitle(dialog, L"Выбор файла"))) {
+				dialog->lpVtbl->Release(dialog);
+				DestroyWindow(h);
+				return 1;
+			};
+			HRESULT show_result;
+			show_result = dialog->lpVtbl->Show(dialog, h);
+			if (HRESULT_FROM_WIN32(ERROR_CANCELLED) == show_result) {
+				dialog->lpVtbl->Release(dialog);
+				return 0;
+			};
+			if (FAILED(show_result)) {
+				dialog->lpVtbl->Release(dialog);
+				DestroyWindow(h);
+				return 1;
+			};
+			IShellItem* result;
+			if (FAILED(dialog->lpVtbl->GetResult(dialog, &result))) {
+				dialog->lpVtbl->Release(dialog);
+				DestroyWindow(h);
+				return 1;
+			};
+			LPWSTR path;
+			if (FAILED(result->lpVtbl->GetDisplayName(result, SIGDN_FILESYSPATH, &path))) {
+				result->lpVtbl->Release(result);
+				dialog->lpVtbl->Release(dialog);
+				DestroyWindow(h);
+				return 1;
+			};
+			SetWindowTextW(main_struct->path_edit, path);
+			CoTaskMemFree(path);
+			result->lpVtbl->Release(result);
+			dialog->lpVtbl->Release(dialog);
 		}
 		else if (cmd == COMMAND_RUN) {
 			const int length = GetWindowTextLengthW(main_struct->path_edit);

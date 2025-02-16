@@ -1,2 +1,3 @@
 #pragma once
-__declspec(dllexport) DWORD setHooks(void *arg);
+
+MONITORLIBRARY_API DWORD setHooks(void *arg);

@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include "distormx.h"
+#include "api.h"
 #include "MonitorContext.h"
 #include "context.h"
 #include "setFileAttributes_hook.h"
@@ -7,7 +8,7 @@
 #include "writeFileEx_hook.h"
 
 #include "setHooks.h"
-__declspec(dllexport) DWORD setHooks(void *arg) {
+MONITORLIBRARY_API DWORD setHooks(void *arg) {
 	void* sfa = (void*)&SetFileAttributesW;
 	distormx_hook(&sfa, &setFileAttributes_hook);
 	context.setFileAttributes_original = (BOOL(*)(LPCWSTR, DWORD)) sfa;

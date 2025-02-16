@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <commctrl.h>
+#include "..\MonitorLibrary\api.h"
 #include "..\MonitorLibrary\monitorStub.h"
 #include "resource.h"
 #include "MainWindowStruct.h"

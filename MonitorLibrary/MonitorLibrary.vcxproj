@@ -176,6 +176,7 @@
     <ClCompile Include="writeFile_hook.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="api.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="MonitorContext.h" />
     <ClInclude Include="monitorStub.h" />
