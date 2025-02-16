@@ -68,7 +68,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 	{
 		const unsigned int cmd = LOWORD(w);
 		if (cmd == COMMAND_FIND) {
-			IFileDialog* dialog;
+			IFileOpenDialog* dialog;
 			if (FAILED(CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, &dialog))) {
 				DestroyWindow(h);
 				return 1;
