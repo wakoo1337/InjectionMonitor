@@ -11,14 +11,11 @@
 #include "setHooks.h"
 MONITORLIBRARY_API DWORD setHooks(void *arg) {
 	context.comm_struct = * (struct CommunicationStruct *) arg;
-	void* sfa = (void*)&SetFileAttributesW;
-	distormx_hook(&sfa, &setFileAttributes_hook);
-	context.setFileAttributes_original = sfa;
-	void* wf = (void*)&WriteFile;
-	distormx_hook(&wf, &writeFile_hook);
-	context.writeFile_original = wf;
-	void* wfx = (void*)&WriteFileEx;
-	distormx_hook(&wfx, &writeFileEx_hook);
-	context.writeFileEx_original = wfx;
+	context.setFileAttributes_original = (void*)&SetFileAttributesW;
+	distormx_hook((void *) & context.setFileAttributes_original, &setFileAttributes_hook);
+	context.writeFile_original = (void*)&WriteFile;
+	distormx_hook((void *) & context.writeFile_original, &writeFile_hook);
+	context.writeFileEx_original = (void*)&WriteFileEx;
+	distormx_hook((void *) & context.writeFileEx_original, &writeFileEx_hook);
 	return 0;
 };
