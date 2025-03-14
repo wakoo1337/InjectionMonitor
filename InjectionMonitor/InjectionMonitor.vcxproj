@@ -155,6 +155,7 @@
     <ClCompile Include="InjectionMonitor.c" />
     <ClCompile Include="mainWndProc.c" />
     <ClCompile Include="main_class_name.c" />
+    <ClCompile Include="pipeListenerThread.c" />
     <ClCompile Include="updateMainWindow.c" />
   </ItemGroup>
   <ItemGroup>
@@ -162,8 +163,10 @@
     <ClInclude Include="MainWindowStruct.h" />
     <ClInclude Include="mainWndProc.h" />
     <ClInclude Include="main_class_name.h" />
+    <ClInclude Include="pipeListenerThread.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="updateMainWindow.h" />
+    <ClInclude Include="WM_LOGMESSAGE.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="InjectionMonitor.rc" />

@@ -177,7 +177,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="api.h" />
+    <ClInclude Include="CommunicationStruct.h" />
     <ClInclude Include="context.h" />
+    <ClInclude Include="LogMessageStruct.h" />
     <ClInclude Include="MonitorContext.h" />
     <ClInclude Include="monitorStub.h" />
     <ClInclude Include="setFileAttributes_hook.h" />

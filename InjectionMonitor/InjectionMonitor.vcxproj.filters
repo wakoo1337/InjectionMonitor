@@ -30,6 +30,9 @@
     <ClCompile Include="aboutDialog.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="pipeListenerThread.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main_class_name.h">
@@ -48,6 +51,12 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="aboutDialog.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="pipeListenerThread.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="WM_LOGMESSAGE.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
