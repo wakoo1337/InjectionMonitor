@@ -10,11 +10,19 @@ DWORD WINAPI pipeListenerThread(LPVOID lpParameter) {
 	struct MainWindowStruct* main_struct = (struct MainWindowStruct*) lpParameter;
 	for (;;) {
 		unsigned int size;
-		ReadFile(main_struct->read_end, &size, sizeof size, NULL, NULL);
+		DWORD readed;
+		if ((!ReadFile(main_struct->read_end, &size, sizeof size, &readed, NULL)) || (readed != sizeof size)) {
+			return 1;
+		};
 		struct LogMessageStruct* lms;
-		lms = malloc(size);
+		lms = malloc((sizeof *lms) + size);
+		if (NULL == lms) {
+			return 1;
+		};
 		lms->size = size;
-		ReadFile(main_struct->read_end, ((char *) lms) + sizeof(unsigned int), size - sizeof(unsigned int), NULL, NULL);
+		if ((!ReadFile(main_struct->read_end, ((char*)lms) + (sizeof *lms), size, &readed, NULL)) || (readed != size)) {
+			return 1;
+		};
 		free(lms);
 	};
 	CloseHandle(main_struct->comm_struct.pipe);

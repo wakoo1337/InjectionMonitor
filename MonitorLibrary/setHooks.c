@@ -7,10 +7,12 @@
 #include "setFileAttributes_hook.h"
 #include "writeFile_hook.h"
 #include "writeFileEx_hook.h"
+#include "pid.h"
 
 #include "setHooks.h"
 MONITORLIBRARY_API DWORD setHooks(void *arg) {
 	context.comm_struct = * (struct CommunicationStruct *) arg;
+	pid = GetCurrentProcessId();
 	context.setFileAttributes_original = (void*)&SetFileAttributesW;
 	distormx_hook((void *) & context.setFileAttributes_original, &setFileAttributes_hook);
 	context.writeFile_original = (void*)&WriteFile;

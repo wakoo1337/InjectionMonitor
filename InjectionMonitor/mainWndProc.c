@@ -30,6 +30,12 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		if (!CreatePipe(&main_struct->read_end, &main_struct->comm_struct.pipe, NULL, 0)) {
 			return -1;
 		};
+		if ((main_struct->comm_struct.mutex = CreateMutexW(NULL, FALSE, NULL)) == 0) {
+			CloseHandle(&main_struct->read_end);
+			CloseHandle(&main_struct->comm_struct.pipe);
+			CloseHandle(&main_struct->comm_struct.mutex);
+			return -1;
+		};
 		main_struct->listener_thread = CreateThread(NULL, 0, &pipeListenerThread, main_struct, 0, NULL);
 		main_struct->path_static = CreateWindowExW(0, L"static", L"Путь", WS_CHILD | WS_VISIBLE | SS_LEFT, 0, 0, 0, 0, h, NULL, main_struct->hInstance, NULL);
 		main_struct->find_button = CreateWindowExW(0, L"button", L"", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | BS_ICON, 0, 0, 0, 0, h, (HMENU)COMMAND_FIND, main_struct->hInstance, NULL);
@@ -42,7 +48,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		main_struct->run_button = CreateWindowExW(0, L"button", L"Запустить", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 0, 0, h, (HMENU)COMMAND_RUN, main_struct->hInstance, NULL);
 		main_struct->exit_button = CreateWindowExW(0, L"button", L"Выйти", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 0, 0, h, (HMENU)COMMAND_EXIT, main_struct->hInstance, NULL);
 		main_struct->about_button = CreateWindowExW(0, L"button", L"О программе", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0, 0, 0, 0, h, (HMENU)COMMAND_ABOUT, main_struct->hInstance, NULL);
-		main_struct->messages_edit = CreateWindowExW(0, L"edit", L"Injection Monitor", WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_READONLY, 0, 0, 0, 0, h, 0, main_struct->hInstance, NULL);
+		main_struct->messages_edit = CreateWindowExW(0, L"edit", L"Injection Monitor\r\n", WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_READONLY, 0, 0, 0, 0, h, 0, main_struct->hInstance, NULL);
 		updateMainWindow(h, main_struct);
 		NONCLIENTMETRICSW ncm;
 		ncm.cbSize = sizeof ncm;
@@ -285,7 +291,28 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
-			if (!WriteProcessMemory(pi.hProcess, remote_cs, &main_struct->comm_struct, sizeof main_struct->comm_struct, NULL)) {
+			struct CommunicationStruct copy_cs;
+			if (!DuplicateHandle(GetCurrentProcess(), main_struct->comm_struct.pipe, pi.hProcess, &copy_cs.pipe, FILE_GENERIC_WRITE | SYNCHRONIZE, FALSE, 0)) {
+				VirtualFreeEx(pi.hProcess, remote_cs, 0, MEM_RELEASE);
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path_buffer);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			if (!DuplicateHandle(GetCurrentProcess(), main_struct->comm_struct.mutex, pi.hProcess, &copy_cs.mutex, GENERIC_ALL | SYNCHRONIZE, FALSE, 0)) {
+				VirtualFreeEx(pi.hProcess, remote_cs, 0, MEM_RELEASE);
+				TerminateProcess(pi.hProcess, 0);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+				free(path_buffer);
+				free(path);
+				DestroyWindow(h);
+				return 1;
+			};
+			if (!WriteProcessMemory(pi.hProcess, remote_cs, &copy_cs, sizeof copy_cs, NULL)) {
 				VirtualFreeEx(pi.hProcess, remote_cs, 0, MEM_RELEASE);
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);

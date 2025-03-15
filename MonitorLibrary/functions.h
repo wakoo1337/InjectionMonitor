@@ -1,0 +1,2 @@
+#pragma once
+#define FUNCTION_SETFILEATTRIBUTES 1
