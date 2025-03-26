@@ -1,7 +1,9 @@
 #include <Windows.h>
+#include <stdint.h>
 #include <shobjidl.h>
 #include "resource.h"
 #include "..\MonitorLibrary\CommunicationStruct.h"
+#include "..\MonitorLibrary\LogMessageStruct.h"
 #include "MainWindowStruct.h"
 #include "updateMainWindow.h"
 #include "aboutDialog.h"
@@ -199,7 +201,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				.cb = sizeof(STARTUPINFOW)
 			};
 			PROCESS_INFORMATION pi;
-			if (!CreateProcessW(path, NULL, NULL, NULL, FALSE, CREATE_SUSPENDED, NULL, NULL, &siw, &pi)) {
+			if (!CreateProcessW(path, NULL, NULL, NULL, TRUE, CREATE_SUSPENDED, NULL, NULL, &siw, &pi)) {
 				free(path_buffer);
 				free(path);
 				DestroyWindow(h);
@@ -292,7 +294,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				return 1;
 			};
 			struct CommunicationStruct copy_cs;
-			if (!DuplicateHandle(GetCurrentProcess(), main_struct->comm_struct.pipe, pi.hProcess, &copy_cs.pipe, FILE_GENERIC_WRITE | SYNCHRONIZE, FALSE, 0)) {
+			if (!DuplicateHandle(GetCurrentProcess(), main_struct->comm_struct.pipe, pi.hProcess, &copy_cs.pipe, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
 				VirtualFreeEx(pi.hProcess, remote_cs, 0, MEM_RELEASE);
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
@@ -302,7 +304,7 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 				DestroyWindow(h);
 				return 1;
 			};
-			if (!DuplicateHandle(GetCurrentProcess(), main_struct->comm_struct.mutex, pi.hProcess, &copy_cs.mutex, GENERIC_ALL | SYNCHRONIZE, FALSE, 0)) {
+			if (!DuplicateHandle(GetCurrentProcess(), main_struct->comm_struct.mutex, pi.hProcess, &copy_cs.mutex, 0, FALSE, DUPLICATE_SAME_ACCESS)) {
 				VirtualFreeEx(pi.hProcess, remote_cs, 0, MEM_RELEASE);
 				TerminateProcess(pi.hProcess, 0);
 				CloseHandle(pi.hProcess);
@@ -397,8 +399,8 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		buffer = LocalLock(edit_local);
 		memcpy(buffer + main_struct->msg_length, message, w * sizeof(wchar_t));
 		buffer[main_struct->msg_length + w] = L'\0';
-		main_struct->msg_length += w;
 		LocalUnlock(edit_local);
+		main_struct->msg_length += w;
 		SendMessageW(main_struct->messages_edit, EM_SETHANDLE, (WPARAM)edit_local, 0);
 	}
 	break;

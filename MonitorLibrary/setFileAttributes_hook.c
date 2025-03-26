@@ -10,14 +10,17 @@
 BOOL WINAPI setFileAttributes_hook(LPCWSTR lpFileName, DWORD dwFileAttributes) {
 	WaitForSingleObject(context.comm_struct.mutex, INFINITE);
 	struct LogMessageStruct* logmsg;
-	logmsg = malloc((sizeof *logmsg) + sizeof(unsigned int));
-	logmsg->size = sizeof(unsigned int);
-	logmsg->pid = GetCurrentProcessId();
-	logmsg->function = FUNCTION_SETFILEATTRIBUTES;
-	*((unsigned int *) logmsg->content) = dwFileAttributes;
-	ReleaseMutex(context.comm_struct.mutex);
-	DWORD written;
-	WriteFile(context.comm_struct.pipe, logmsg, (sizeof logmsg) + sizeof(unsigned int), &written, NULL);
-	free(logmsg);
+	HANDLE process_heap = GetProcessHeap();
+	logmsg = HeapAlloc(process_heap, 0, (sizeof * logmsg) + sizeof(unsigned int));
+	if (logmsg) {
+		logmsg->size = sizeof(unsigned int);
+		logmsg->pid = GetCurrentProcessId();
+		logmsg->function = FUNCTION_SETFILEATTRIBUTES;
+		*((unsigned int*)logmsg->content) = dwFileAttributes;
+		DWORD written;
+		context.writeFile_original(context.comm_struct.pipe, logmsg, (sizeof * logmsg) + sizeof(unsigned int), &written, NULL);
+		ReleaseMutex(context.comm_struct.mutex);
+		HeapFree(process_heap, 0, logmsg);
+	};
 	return context.setFileAttributes_original(lpFileName, dwFileAttributes);
 };
