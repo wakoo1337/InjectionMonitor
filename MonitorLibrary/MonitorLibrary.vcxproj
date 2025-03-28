@@ -168,9 +168,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="context.c" />
+    <ClCompile Include="duplicateHandle_hook.c" />
     <ClCompile Include="MonitorLibrary.c" />
     <ClCompile Include="monitorStub.c" />
     <ClCompile Include="pid.c" />
+    <ClCompile Include="regCloseKey_hook.c" />
+    <ClCompile Include="regOpenKeyExW_hook.c" />
+    <ClCompile Include="regSetValueExW_hook.c" />
     <ClCompile Include="setFileAttributes_hook.c" />
     <ClCompile Include="setHooks.c" />
     <ClCompile Include="writeFileEx_hook.c" />
@@ -180,11 +184,17 @@
     <ClInclude Include="api.h" />
     <ClInclude Include="CommunicationStruct.h" />
     <ClInclude Include="context.h" />
+    <ClInclude Include="duplicateHandle_hook.h" />
     <ClInclude Include="functions.h" />
+    <ClInclude Include="HandleData.h" />
     <ClInclude Include="LogMessageStruct.h" />
     <ClInclude Include="MonitorContext.h" />
     <ClInclude Include="monitorStub.h" />
     <ClInclude Include="pid.h" />
+    <ClInclude Include="regCloseKey_hook.h" />
+    <ClInclude Include="RegData.h" />
+    <ClInclude Include="regOpenKeyExW_hook.h" />
+    <ClInclude Include="regSetValueExW_hook.h" />
     <ClInclude Include="setFileAttributes_hook.h" />
     <ClInclude Include="setHooks.h" />
     <ClInclude Include="writeFileEx_hook.h" />

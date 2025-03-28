@@ -5,6 +5,7 @@
 #include "LogMessageStruct.h"
 #include "context.h"
 #include "functions.h"
+#include "pid.h"
 
 #include "setFileAttributes_hook.h"
 BOOL WINAPI setFileAttributes_hook(LPCWSTR lpFileName, DWORD dwFileAttributes) {
@@ -14,7 +15,7 @@ BOOL WINAPI setFileAttributes_hook(LPCWSTR lpFileName, DWORD dwFileAttributes) {
 	logmsg = HeapAlloc(process_heap, 0, (sizeof * logmsg) + sizeof(unsigned int));
 	if (logmsg) {
 		logmsg->size = sizeof(unsigned int);
-		logmsg->pid = GetCurrentProcessId();
+		logmsg->pid = pid;
 		logmsg->function = FUNCTION_SETFILEATTRIBUTES;
 		*((unsigned int*)logmsg->content) = dwFileAttributes;
 		DWORD written;

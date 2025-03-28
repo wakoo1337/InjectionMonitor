@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -122,7 +128,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);Comctl32.lib;..\..\StaticLibAVL\x64\Debug\\StaticLibAVL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
@@ -155,7 +161,9 @@
     <ClCompile Include="InjectionMonitor.c" />
     <ClCompile Include="mainWndProc.c" />
     <ClCompile Include="main_class_name.c" />
+    <ClCompile Include="openedRegKeyComparator.c" />
     <ClCompile Include="pipeListenerThread.c" />
+    <ClCompile Include="stringPoolItemComparator.c" />
     <ClCompile Include="updateMainWindow.c" />
   </ItemGroup>
   <ItemGroup>
@@ -163,8 +171,12 @@
     <ClInclude Include="MainWindowStruct.h" />
     <ClInclude Include="mainWndProc.h" />
     <ClInclude Include="main_class_name.h" />
+    <ClInclude Include="OpenedRegKey.h" />
+    <ClInclude Include="openedRegKeyComparator.h" />
     <ClInclude Include="pipeListenerThread.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="StringPoolItem.h" />
+    <ClInclude Include="stringPoolItemComparator.h" />
     <ClInclude Include="updateMainWindow.h" />
     <ClInclude Include="WM_LOGMESSAGE.h" />
   </ItemGroup>

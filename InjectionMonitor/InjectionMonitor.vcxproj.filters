@@ -33,6 +33,12 @@
     <ClCompile Include="pipeListenerThread.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="stringPoolItemComparator.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="openedRegKeyComparator.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main_class_name.h">
@@ -57,6 +63,18 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="WM_LOGMESSAGE.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenedRegKey.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="StringPoolItem.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="stringPoolItemComparator.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="openedRegKeyComparator.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

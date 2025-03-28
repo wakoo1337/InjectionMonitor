@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <shobjidl.h>
 #include "resource.h"
+#include "..\..\StaticLibAVL\avl.h"
 #include "..\MonitorLibrary\CommunicationStruct.h"
 #include "..\MonitorLibrary\LogMessageStruct.h"
 #include "MainWindowStruct.h"
@@ -9,6 +10,8 @@
 #include "aboutDialog.h"
 #include "pipeListenerThread.h"
 #include "WM_LOGMESSAGE.h"
+#include "stringPoolItemComparator.h"
+#include "openedRegKeyComparator.h"
 
 #include "mainWndProc.h"
 LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
@@ -29,6 +32,8 @@ LRESULT CALLBACK mainWndProc(HWND h, UINT u, WPARAM w, LPARAM l) {
 		main_struct->dpi = GetDpiForWindow(h);
 		main_struct->msg_length = 19;
 		main_struct->main_window = h;
+		main_struct->string_pool = avl_create(&stringPoolItemComparator, NULL, NULL);
+		main_struct->reg_keys = avl_create(&openedRegKeyComparator, NULL, NULL);
 		if (!CreatePipe(&main_struct->read_end, &main_struct->comm_struct.pipe, NULL, 0)) {
 			return -1;
 		};

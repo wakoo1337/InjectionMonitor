@@ -12,4 +12,6 @@ struct MainWindowStruct {
 	HANDLE listener_thread;
 	HANDLE read_end;
 	struct CommunicationStruct comm_struct;
+	struct avl_table* string_pool;
+	struct avl_table* reg_keys;
 };
