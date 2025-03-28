@@ -158,6 +158,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aboutDialog.c" />
+    <ClCompile Include="addTokensToRegistryKey.c" />
     <ClCompile Include="InjectionMonitor.c" />
     <ClCompile Include="mainWndProc.c" />
     <ClCompile Include="main_class_name.c" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aboutDialog.h" />
+    <ClInclude Include="addTokensToRegistryKey.h" />
     <ClInclude Include="MainWindowStruct.h" />
     <ClInclude Include="mainWndProc.h" />
     <ClInclude Include="main_class_name.h" />

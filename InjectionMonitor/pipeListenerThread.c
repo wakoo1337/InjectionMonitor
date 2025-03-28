@@ -9,6 +9,7 @@
 #include "..\MonitorLibrary\RegData.h"
 #include "StringPoolItem.h"
 #include "OpenedRegKey.h"
+#include "addTokensToRegistryKey.h"
 #include "WM_LOGMESSAGE.h"
 
 #include "pipeListenerThread.h"
@@ -87,46 +88,45 @@ DWORD WINAPI pipeListenerThread(LPVOID lpParameter) {
 				{
 					struct RegData* rd;
 					rd = (struct RegData *) lms->content;
-					if ((rd->old_key == HKEY_CLASSES_ROOT) || (rd->old_key == HKEY_CURRENT_CONFIG) || (rd->old_key == HKEY_USERS)) {
-						// Эти ключи нам пока не интересны
-					}
-					else if ((rd->old_key == HKEY_CURRENT_USER) || (rd->old_key == HKEY_LOCAL_MACHINE)) {
+					if ((rd->old_key == HKEY_CURRENT_USER) || (rd->old_key == HKEY_LOCAL_MACHINE) || (rd->old_key == HKEY_CLASSES_ROOT) || (rd->old_key == HKEY_CURRENT_CONFIG) || (rd->old_key == HKEY_USERS)) {
 						// Эти интересны
 						struct OpenedRegKey* opened_key;
 						opened_key = malloc(sizeof *opened_key); // TODO перенести в отдельную функцию
 						opened_key->pid = lms->pid;
 						opened_key->key = rd->new_key;
+						opened_key->parent = rd->old_key;
 						opened_key->str_items = NULL;
 						opened_key->str_items_count = 0;
-						wchar_t* context = NULL, *token;
-						const wchar_t delimiter[] = L"\\";
-						token = wcstok_s(rd->path, delimiter, &context);
-						while (token) {
-							struct StringPoolItem spi_stub = { .item = token }, *found;
-							found = avl_find(main_struct->string_pool, &spi_stub);
-							if (NULL == found) {
-								struct StringPoolItem* new_item;
-								new_item = malloc(sizeof * new_item);
-								new_item->count = 1;
-								new_item->item = _wcsdup(token);
-								void** probe;
-								probe = avl_probe(main_struct->string_pool, new_item);
-								assert((*probe) == new_item);
-								found = *probe;
-							} else {
-								found->count++;
-							};
-							opened_key->str_items_count++;
-							opened_key->str_items = realloc(opened_key->str_items, opened_key->str_items_count * sizeof(*opened_key->str_items));
-							opened_key->str_items[opened_key->str_items_count - 1] = found;
-							token = wcstok_s(NULL, delimiter, &context);
-						};
+						addTokensToRegistryKey(main_struct->string_pool, opened_key, rd->path);
 						void** probe;
 						probe = avl_probe(main_struct->reg_keys, opened_key);
 						assert((*probe) == opened_key);
 					}
 					else {
-						// А это -- если родителем является другой открытый ключ
+						// А это — если родителем является другой открытый ключ
+						struct OpenedRegKey* new_key;
+						new_key = malloc(sizeof * new_key);
+						new_key->pid = lms->pid;
+						new_key->key = rd->new_key;
+						const struct OpenedRegKey parent_stub = {
+							.pid = lms->pid,
+							.key = rd->old_key
+						};
+						struct OpenedRegKey* parent_key;
+						parent_key = avl_find(main_struct->reg_keys, &parent_stub);
+						if (parent_key) {
+							new_key->parent = parent_key->parent;
+							new_key->str_items_count = parent_key->str_items_count;
+							new_key->str_items = malloc(new_key->str_items_count * sizeof(*new_key->str_items));
+							for (unsigned int i = 0; i < new_key->str_items_count; i++) {
+								new_key->str_items[i] = parent_key->str_items[i];
+								new_key->str_items[i]->count++;
+							};
+							addTokensToRegistryKey(main_struct->string_pool, new_key, rd->path);
+							void** probe;
+							probe = avl_probe(main_struct->reg_keys, new_key);
+							assert((*probe) == new_key);
+						} else free(new_key);
 					}
 				}
 				break;
@@ -137,7 +137,7 @@ DWORD WINAPI pipeListenerThread(LPVOID lpParameter) {
 					key_stub.key = *(HKEY*)lms->content;
 					key = avl_find(main_struct->reg_keys, &key_stub);
 					if (key->str_items_count == 5) {
-						if (!(_wcsicmp(key->str_items[0]->item, L"software") || _wcsicmp(key->str_items[1]->item, L"microsoft") || _wcsicmp(key->str_items[2]->item, L"windows") || _wcsicmp(key->str_items[3]->item, L"currentversion") || _wcsicmp(key->str_items[4]->item, L"run"))) {
+						if ((key->parent == HKEY_LOCAL_MACHINE || key->parent == HKEY_CURRENT_USER) && !(_wcsicmp(key->str_items[0]->item, L"software") || _wcsicmp(key->str_items[1]->item, L"microsoft") || _wcsicmp(key->str_items[2]->item, L"windows") || _wcsicmp(key->str_items[3]->item, L"currentversion") || _wcsicmp(key->str_items[4]->item, L"run"))) {
 							SendMessageW(main_struct->main_window, WM_LOGMESSAGE, prefix_offset, prefix_buffer);
 							SendMessageW(main_struct->main_window, WM_LOGMESSAGE, 24, L"Запись в автозагрузку!\r\n");
 						};
